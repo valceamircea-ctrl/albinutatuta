@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aventurile Albinuței Tuta — Carte interactivă (10 pagini)</title>
+  <style>
+    :root {
+      --bg: #fff9f2;
+      --card: #ffffff;
+      --ink: #2b1f14;
+      --accent: #ffb703;
+      --accent-2: #8ecae6;
+      --accent-3: #90be6d;
+      --muted: #f1ede6;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink); background: radial-gradient(1200px 800px at 100% -200px, #fff3d1 0%, #fff 30%, var(--bg) 100%);
+    }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 16px; }
+    header {
+      display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .bee {
+      width: 44px; height: 44px; display:grid; place-items:center; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffd166 0 40%, #fcbf49 41% 100%);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .bee:before, .bee:after { content:""; position:absolute; top:-10px; width:22px; height:14px; border-radius:50% 50% 0 0; background:#d9f0ff; opacity:.8; }
+    .bee:before { left:4px; transform:rotate(-12deg); }
+    .bee:after { right:4px; transform:rotate(12deg); }
+    h1 { font-size: clamp(20px, 4vw, 28px); margin: 0; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:8px; }
+    button, .btn {
+      appearance:none; border:0; border-radius:14px; padding:10px 14px; cursor:pointer; font-weight:600; box-shadow: var(--shadow);
+      background: var(--card);
+    }
+    button:hover { transform: translateY(-1px); }
+    .primary { background: linear-gradient(180deg, #ffe08a, #ffc84a); }
+    .voice.active { outline: 3px solid var(--accent-2); }
+
+    .card {
+      background: var(--card); border-radius: 20px; box-shadow: var(--shadow);
+      padding: 18px; display:grid; grid-template-columns: 1.1fr 1.4fr; gap: 20px;
+    }
+    @media (max-width: 860px) {
+      .card { grid-template-columns: 1fr; }
+    }
+
+    .scene {
+      background: linear-gradient(180deg, #fef8ea, #fff); border-radius: 16px; padding: 12px; display:grid; gap: 10px;
+      min-height: 320px; position:relative; overflow:hidden;
+    }
+    .illustration {
+      display:grid; place-items:center; min-height: 220px; font-size: 90px; user-select: none;
+    }
+    .caption { text-align:center; font-size:14px; color:#5a4c3a; }
+
+    .story { display:grid; gap: 12px; }
+    .story p { font-size: clamp(16px, 2.2vw, 18px); line-height: 1.55; margin: 0; }
+
+    .choices { display:grid; gap: 8px; }
+    .choices button { text-align:left; }
+
+    .progress {
+      margin-top: 12px; display:flex; align-items:center; gap:10px;
+    }
+    .bar { flex:1; height: 10px; background: var(--muted); border-radius: 999px; position:relative; overflow:hidden; }
+    .bar > i { position:absolute; inset:0; width:0%; background: linear-gradient(90deg, var(--accent-3), var(--accent)); }
+
+    .status { font-size: 13px; opacity:.8; }
+
+    dialog { border:0; border-radius: 16px; padding: 0; box-shadow: var(--shadow); max-width: 720px; }
+    .sheet { padding: 14px; background: var(--card); border-radius: 16px; }
+    .grid { display:grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .grid button { font-size: 34px; padding: 14px 0; border-radius: 12px; }
+    .grid .active { outline: 3px solid var(--accent); }
+    .sheet h3 { margin: 8px 0 12px; }
+    .sheet .row { display:flex; gap:10px; align-items:center; justify-content: space-between; flex-wrap:wrap; }
+    input[type="file"]{ display:none; }
+    label[for="file"]{ border-radius: 12px; padding: 10px 12px; background: #eef7ff; font-weight:600; cursor:pointer; box-shadow: var(--shadow); }
+
+    .meter {
+      display:flex; gap:6px; align-items:center; font-size: 12px; margin-top: 8px;
+    }
+    .bubble { background:#ecf7ee; padding:2px 8px; border-radius:999px; }
+
+    .footer { margin-top: 16px; text-align:center; font-size: 12px; color:#6b5b49; }
+    .small { font-size: 12px; opacity:.8; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="bee" aria-hidden="true">🐝</div>
+        <h1>Aventurile Albinuței Tuta — carte interactivă</h1>
+      </div>
+      <div class="toolbar" role="toolbar" aria-label="Acțiuni">
+        <button class="btn" id="chooseArt">Alege ilustrația</button>
+        <button class="btn voice" id="voiceBtn" title="Citește cu voce">🔊 Citește</button>
+        <button class="btn" id="backBtn" title="Înapoi o pagină">↩️ Înapoi</button>
+        <button class="btn" id="resetBtn" title="Începe din nou">🗑️ Resetează</button>
+        <button class="btn" id="printBtn" title="Printează / PDF">🖨️ Printează</button>
+      </div>
+    </header>
+
+    <main class="card" role="main">
+      <section class="scene" aria-label="Ilustrație">
+        <div class="illustration" id="illus" aria-live="polite" aria-label="Ilustrația paginii">🐝🌼</div>
+        <div class="caption small" id="illusCap">Ilustrația aleasă pentru această pagină.</div>
+        <div class="meter">
+          <span class="small">Bunătate:</span>
+          <span class="bubble" id="kindness">0</span>
+        </div>
+      </section>
+
+      <section class="story" aria-label="Poveste">
+        <p id="text"></p>
+        <div class="choices" id="choices" role="group" aria-label="Alege ce se întâmplă mai departe"></div>
+        <div class="progress" aria-label="Progresul poveștii">
+          <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+          <div class="status" id="status">Pagina 1 din 10</div>
+        </div>
+      </section>
+    </main>
+
+    <p class="footer">Scopul poveștii: să descoperim, alături de Tuta, că <strong>e bine să împarți cu ceilalți</strong> 🧡.</p>
+  </div>
+
+  <!-- Dialog pentru ilustrații -->
+  <dialog id="artDialog">
+    <div class="sheet">
+      <h3>Alege o ilustrație pentru <span id="pageLabel">pagina curentă</span></h3>
+      <div class="grid" id="emojiGrid" role="listbox" aria-label="Galerie de ilustrații"></div>
+      <div class="row" style="margin-top:10px;">
+        <input id="file" type="file" accept="image/*" />
+        <label for="file">📷 Încarcă o imagine</label>
+        <div style="flex:1"></div>
+        <button class="btn" id="closeArt">Gata</button>
+      </div>
+      <p class="small">Sfat: poți seta altă ilustrație pentru fiecare pagină. Se salvează automat în acest browser.</p>
+    </div>
+  </dialog>
+
+  <script>
+    // --- DATE POVESTE (10 pagini, alegeri care influențează un scor de bunătate) ---
+    const PAGES = [
+      { // 1
+        t: "Dimineață în poiană. Albinuța Tuta găsește două flori pline cu nectar. Ce face?",
+        c: [
+          { label: "Culege singură tot nectar-ul rapid", score: -1, illus: "🐝🥤" },
+          { label: "Îi cheamă pe prieteni să guste împreună", score: +2, illus: "🐝👯‍♀️" },
+        ],
+      },
+      { // 2
+        t: "Vântul aduce miros de miere de la stup. Tuta se gândește la baloșelul ei. Cum procedează?",
+        c: [
+          { label: "Își umple singură baloșelul până la refuz", score: -1, illus: "🍯🧺" },
+          { label: "Lasă loc și pentru ceilalți pui de albine", score: +1, illus: "🍯🤝" },
+        ],
+      },
+      { // 3
+        t: "Pe potecă, Tuta vede o buburuză obosită. Are puțin nectar în rucsac.",
+        c: [
+          { label: "Îi oferă o înghițitură de nectar buburuzei", score: +2, illus: "🐞🥤" },
+          { label: "Se preface că nu a observat", score: -1, illus: "🙈" },
+        ],
+      },
+      { // 4
+        t: "Norii se strâng. Începe o ploaie măruntă. Sub o frunză e loc pentru două insecte.",
+        c: [
+          { label: "Împarte adăpostul cu un fluture ud", score: +2, illus: "🦋🌧️" },
+          { label: "Păstrează frunza doar pentru ea", score: -1, illus: "🌧️🚫" },
+        ],
+      },
+      { // 5
+        t: "La marginea poienii, ursulețul Bodri privește oala cu miere din stup.",
+        c: [
+          { label: "Propune să guste toți puțin, civilizat", score: +1, illus: "🐻🍯" },
+          { label: "Îl alungă pe Bodri, temându-se că va lua prea mult", score: -1, illus: "🙅‍♀️🐻" },
+        ],
+      },
+      { // 6
+        t: "Se face curcubeu! Tuta găsește un petic cu flori rare.",
+        c: [
+          { label: "Marchează locul și îi cheamă pe ceilalți", score: +2, illus: "🌈📍" },
+          { label: "Ține locul secret pentru mâine", score: -1, illus: "🤫🌼" },
+        ],
+      },
+      { // 7
+        t: "În stup e agitație: larvele au nevoie de hrană.",
+        c: [
+          { label: "Donează din rezervele ei pentru larve", score: +2, illus: "👶🍯" },
+          { label: "Păstrează pentru excursia de poimâine", score: -1, illus: "🎒🍯" },
+        ],
+      },
+      { // 8
+        t: "Vine ora jocurilor. Albinele joacă \"dansul fericirii\".",
+        c: [
+          { label: "O invită și pe albina cea nouă în horă", score: +1, illus: "🕺🐝" },
+          { label: "Joacă doar cu prietenii apropiați", score: -1, illus: "👯‍♀️➡️" },
+        ],
+      },
+      { // 9
+        t: "Seara, Regina întreabă: \"Ce ați învățat azi din poiană?\"",
+        c: [
+          { label: "Tuta povestește cum a împărțit cu toți și cum s-au bucurat împreună", score: +2, illus: "👑💬" },
+          { label: "Zice că a fost o zi obișnuită, fără detalii", score: 0, illus: "😶" },
+        ],
+      },
+      { // 10 (final)
+        t: "Finalul zilei. Tuta se cuibărește în stup, obosită, dar plină de recunoștință.",
+        c: [
+          { label: "Vezi mesajul final", score: 0, illus: "⭐" },
+        ],
+      },
+    ];
+
+    const ILLUSTRATIONS = [
+      "🐝🌼", "🌻", "🌳", "🏵️", "🍯", "🐞", "🦋", "🐻", "🌧️", "🌈", "👑", "✨"
+    ];
+
+    // --- STARE & PERSISTENȚĂ ---
+    const state = {
+      page: 1,
+      score: 0,
+      history: [], // pentru butonul Înapoi
+      art: {}      // mapă: pagina -> ilustrație (emoji sau URL imagine)
+    };
+
+    // încărcare din localStorage
+    try {
+      const saved = JSON.parse(localStorage.getItem("tuta_state_v1"));
+      if (saved && typeof saved === 'object') Object.assign(state, saved);
+    } catch {}
+
+    // --- ELEMENTE ---
+    const textEl = document.getElementById('text');
+    const choicesEl = document.getElementById('choices');
+    const fillEl = document.getElementById('fill');
+    const statusEl = document.getElementById('status');
+    const illusEl = document.getElementById('illus');
+    const illusCap = document.getElementById('illusCap');
+    const kindnessEl = document.getElementById('kindness');
+
+    function save() {
+      localStorage.setItem("tuta_state_v1", JSON.stringify(state));
+    }
+
+    // --- UTILITARE ---
+    function setIllustrationForCurrentPage(display) {
+      state.art[state.page] = display; save(); render();
+    }
+
+    function pageIllustration() {
+      const custom = state.art[state.page];
+      return custom || ILLUSTRATIONS[(state.page - 1) % ILLUSTRATIONS.length];
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return alert('Citirea cu voce nu este disponibilă în acest browser.');
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      // alege o voce română dacă există
+      const pickVoice = () => {
+        const vs = speechSynthesis.getVoices();
+        const ro = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('ro')) || vs.find(v => v.lang && v.lang.toLowerCase().includes('ro'));
+        if (ro) utter.voice = ro;
+        speechSynthesis.speak(utter);
+      };
+      if (speechSynthesis.getVoices().length) pickVoice(); else speechSynthesis.onvoiceschanged = pickVoice;
+    }
+
+    function render() {
+      const i = Math.max(1, Math.min(10, state.page)) - 1;
+      const page = PAGES[i];
+      // textul paginii
+      textEl.textContent = page.t;
+      // butoane alegeri
+      choicesEl.innerHTML = '';
+      page.c.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'primary';
+        btn.innerHTML = `➡️ ${choice.label}`;
+        btn.setAttribute('aria-label', choice.label);
+        btn.addEventListener('click', () => {
+          state.history.push({ page: state.page, score: state.score });
+          state.score += choice.score;
+          if (state.page < 10) state.page += 1; // înaintează
+          save();
+          if (state.page === 10) {
+            // transformă ultima pagină într-un ecran de final după alegere
+            finalize();
+          } else {
+            render();
+          }
+          // actualizează ilustrația rapid dacă alegerea are icon sugestivă
+          if (choice.illus && !state.art[state.page]) {
+            setTimeout(() => { illusEl.textContent = choice.illus; }, 0);
+          }
+        });
+        choicesEl.appendChild(btn);
+      });
+
+      // progres vizual
+      const pct = ((state.page - 1) / 9) * 100; // 0..100
+      fillEl.style.width = pct + '%';
+      statusEl.textContent = `Pagina ${state.page} din 10`;
+
+      // ilustrație
+      const ill = pageIllustration();
+      if (/^https?:|^data:|^blob:/.test(ill)) {
+        illusEl.innerHTML = `<img src="${ill}" alt="Ilustrația paginii" style="max-width:100%; max-height:240px; border-radius:12px; box-shadow: var(--shadow);"/>`;
+        illusCap.textContent = 'Ilustrația încărcată de tine pentru această pagină.';
+      } else {
+        illusEl.textContent = ill; // emoji
+        illusCap.textContent = 'Ilustrația aleasă pentru această pagină.';
+      }
+
+      kindnessEl.textContent = state.score;
+    }
+
+    function finalize() {
+      // calculează mesaj în funcție de scor
+      const s = state.score;
+      let title = 'Bravo, Tuta!';
+      let msg = '';
+      if (s >= 6) {
+        msg = 'Astăzi ai împărțit din plin și ai adus zâmbete peste tot! Când împarți, bucuria se înmulțește.';
+      } else if (s >= 2) {
+        msg = 'Ai avut momente frumoase de generozitate. Data viitoare poți împărți și mai des!';
+      } else {
+        msg = 'Nu e târziu să încerci din nou. A împărți cu ceilalți face lumea mai dulce ca mierea!';
+      }
+
+      textEl.innerHTML = `<strong>${title}</strong> <br>${msg} <br><br><em>Morală:</em> <strong>e bine să împarți cu ceilalți</strong> 🧡`;
+      choicesEl.innerHTML = '';
+
+      const again = document.createElement('button');
+      again.textContent = '🔁 Joacă din nou';
+      again.addEventListener('click', () => { state.page = 1; state.score = 0; state.history = []; save(); render(); });
+
+      const back = document.createElement('button');
+      back.textContent = '↩️ Înapoi o pagină';
+      back.addEventListener('click', () => { goBack(); });
+
+      choicesEl.append(again, back);
+
+      const pct = 100; fillEl.style.width = pct + '%';
+      statusEl.textContent = `Pagina 10 din 10`;
+
+      // adaugă o mică animație confetti simplă
+      confetti();
+    }
+
+    function goBack() {
+      const prev = state.history.pop();
+      if (!prev) return; // nimic de întors
+      state.page = prev.page;
+      state.score = prev.score;
+      save(); render();
+    }
+
+    // --- DIALOG ILUSTRAȚII ---
+    const dlg = document.getElementById('artDialog');
+    const grid = document.getElementById('emojiGrid');
+    const pageLabel = document.getElementById('pageLabel');
+
+    function openArt() {
+      grid.innerHTML = '';
+      ILLUSTRATIONS.forEach((emo) => {
+        const b = document.createElement('button');
+        b.textContent = emo;
+        b.addEventListener('click', () => {
+          setIllustrationForCurrentPage(emo);
+          [...grid.children].forEach(ch => ch.classList.remove('active'));
+          b.classList.add('active');
+        });
+        if (state.art[state.page] === emo) b.classList.add('active');
+        grid.appendChild(b);
+      });
+      pageLabel.textContent = `pagina ${state.page}`;
+      dlg.showModal();
+    }
+
+    document.getElementById('chooseArt').addEventListener('click', openArt);
+    document.getElementById('closeArt').addEventListener('click', () => dlg.close());
+
+    // upload imagine proprie
+    document.getElementById('file').addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => setIllustrationForCurrentPage(reader.result);
+      reader.readAsDataURL(f);
+    });
+
+    // --- CONTROALE GLOBALE ---
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (confirm('Sigur vrei să resetezi povestea?')) {
+        state.page = 1; state.score = 0; state.history = []; state.art = {}; save(); render();
+      }
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('backBtn').addEventListener('click', goBack);
+
+    const voiceBtn = document.getElementById('voiceBtn');
+    voiceBtn.addEventListener('click', () => {
+      voiceBtn.classList.toggle('active');
+      const i = Math.max(1, Math.min(10, state.page)) - 1;
+      let toRead = PAGES[i].t;
+      if (state.page === 10) {
+        // citește morala dacă suntem la final
+        toRead = textEl.textContent;
+      }
+      speak(toRead);
+    });
+
+    // confetti simplu cu emoji
+    function confetti() {
+      const n = 24;
+      for (let i = 0; i < n; i++) {
+        const s = document.createElement('div');
+        s.style.position = 'fixed'; s.style.left = Math.random()*100 + 'vw'; s.style.top = '-10px';
+        s.textContent = ['✨','🌼','🍯','🌈'][i%4];
+        s.style.transition = 'transform 1.8s ease-out, opacity 1.8s';
+        s.style.zIndex = 9999; s.style.fontSize = '24px';
+        document.body.appendChild(s);
+        requestAnimationFrame(() => {
+          s.style.transform = `translateY(${(60 + Math.random()*30)}vh) rotate(${Math.random()*360}deg)`;
+          s.style.opacity = 0;
+        });
+        setTimeout(() => s.remove(), 2000);
+      }
+    }
+
+    // PORNEȘTE
+    render();
+  </script>
+</body>
+</html>
